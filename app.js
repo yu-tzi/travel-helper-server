@@ -15,14 +15,9 @@ const cacheFetch = NodeFetchCache.create({
 });
 
 const fetchExchangeRate = async () => {
-  try {
-    const response = await cacheFetch('https://tw.rter.info/capi.php');
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    // TODO: handle error
-    console.error(`💥 ERROR : ${err}`);
-  }
+  const response = await cacheFetch('https://tw.rter.info/capi.php');
+  const data = await response.json();
+  return data;
 };
 
 const calculateNtdByYen = async (yen) => {
@@ -44,21 +39,31 @@ const calculateYenByNtd = async (ntd) => {
 };
 
 const getNtdByYen = async (req, res) => {
-  // TODO: add middleware to handle error
   const { yen } = req.body;
-  const ntd = await calculateNtdByYen(yen);
-  res.status(200).json({
-    result: ntd,
-  });
+  try {
+    const ntd = await calculateNtdByYen(yen);
+    res.status(200).json({
+      result: ntd,
+    });
+  } catch (e) {
+    res.status(404).json({
+      result: 'error',
+    });
+  }
 };
 
 const getYenByNtd = async (req, res) => {
-  // TODO: add middleware to handle error
   const { ntd } = req.body;
-  const yen = await calculateYenByNtd(ntd);
-  res.status(200).json({
-    result: yen,
-  });
+  try {
+    const yen = await calculateYenByNtd(ntd);
+    res.status(200).json({
+      result: yen,
+    });
+  } catch (e) {
+    res.status(404).json({
+      result: 'error',
+    });
+  }
 };
 
 app.route('/api/v1/ntd').get(getNtdByYen);
