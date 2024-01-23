@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+////// start - 串接 line message api 之後改成從 line SDK 輸出結果 //////
 const getNtdByYen = async (req, res) => {
   const { yen } = req.body;
   try {
@@ -42,6 +43,7 @@ const getYenByNtd = async (req, res) => {
 
 app.route('/api/v1/ntd').get(getNtdByYen);
 app.route('/api/v1/yen').get(getYenByNtd);
+////// end - 串接 line message api 之後改成從 line SDK 輸出結果 //////
 
 app.get('/', (req, res) => {
   res.status(200).send('It works!');
