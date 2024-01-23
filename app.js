@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const NodeFetchCache = require('node-fetch-cache');
 
 const app = express();
 app.use(express.json());
@@ -8,10 +9,14 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+const cacheFetch = NodeFetchCache.create({
+  // Only cache responses with a 2xx status code
+  shouldCacheResponse: (response) => response.ok,
+});
+
 const fetchExchangeRate = async () => {
   try {
-    // TODO: try redis to cache currency data
-    const response = await fetch('https://tw.rter.info/capi.php');
+    const response = await cacheFetch('https://tw.rter.info/capi.php');
     const data = await response.json();
     return data;
   } catch (err) {
