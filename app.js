@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const fs = require('fs');
 const short = require('short-uuid');
+const cors = require('cors');
 const {
   calculateNtdByYen,
   calculateYenByNtd,
@@ -9,13 +10,24 @@ const {
 
 const app = express();
 app.use(express.json());
+app.use(
+  '/api/v1/tours',
+  cors({
+    origin: process.env.CLIENT_URL,
+  }),
+);
+// handle preflight request
+app.options(
+  '/api/v1/tours',
+  cors({
+    origin: process.env.CLIENT_URL,
+  }),
+);
 const translator = short();
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// TODO: implement cors on /tour api
 
 const getTours = (req, res) => {
   fs.readFile(`${__dirname}/data/tours.json`, 'utf-8', (err, data) => {
@@ -148,11 +160,114 @@ const patchTour = (req, res) => {
   });
 };
 
+const createTodo = (req, res) => {
+  const tourId = req.params.id;
+  fs.readFile(`${__dirname}/data/tours.json`, 'utf-8', (err, data) => {
+    if (err) {
+      console.error(`💥 Error: ${err}`);
+    }
+    const parsedData = JSON.parse(data);
+    // req.body should look like this
+    /*
+    {
+      name: '買夾心餅乾',
+      checked: false,
+    }
+    */
+    const newTodo = Object.assign({ id: translator.generate() }, req.body);
+    parsedData.find((el) => el.id === tourId).todo.push(newTodo);
+    fs.writeFile(
+      `${__dirname}/data/tours.json`,
+      JSON.stringify(parsedData),
+      (err) => {
+        if (err) {
+          console.error(`💥 Error: ${err}`);
+        }
+      },
+    );
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: parsedData.find((el) => el.id === tourId),
+      },
+    });
+  });
+};
+
+const deleteTodo = (req, res) => {
+  const tourId = req.params.id;
+  const todoId = req.params.todoId;
+  fs.readFile(`${__dirname}/data/tours.json`, 'utf-8', (err, data) => {
+    if (err) {
+      console.error(`💥 Error: ${err}`);
+    }
+    const parsedData = JSON.parse(data);
+    const targetTodo = parsedData.find((el) => el.id === tourId).todo;
+    const newData = targetTodo.filter((todo) => todo.id !== todoId);
+    parsedData.find((el) => el.id === tourId).todo = newData;
+    fs.writeFile(
+      `${__dirname}/data/tours.json`,
+      JSON.stringify(parsedData),
+      (err) => {
+        if (err) {
+          console.error(`💥 Error: ${err}`);
+        }
+      },
+    );
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: parsedData.find((el) => el.id === tourId),
+      },
+    });
+  });
+};
+
+const putTodo = (req, res) => {
+  const tourId = req.params.id;
+  const todoId = req.params.todoId;
+  fs.readFile(`${__dirname}/data/tours.json`, 'utf-8', (err, data) => {
+    if (err) {
+      console.error(`💥 Error: ${err}`);
+    }
+    const parsedData = JSON.parse(data);
+    const targetTodo = parsedData.find((el) => el.id === tourId).todo;
+    const newData = targetTodo.map((todo) => {
+      if (todo.id === todoId) {
+        // req.body should look like this
+        /*
+        {
+          name: '買萊姆酒葡萄夾心餅乾',
+          checked: true,
+        }
+        */
+        return Object.assign({ id: todo.id }, req.body);
+      }
+      return todo;
+    });
+    parsedData.find((el) => el.id === tourId).todo = newData;
+    fs.writeFile(
+      `${__dirname}/data/tours.json`,
+      JSON.stringify(parsedData),
+      (err) => {
+        if (err) {
+          console.error(`💥 Error: ${err}`);
+        }
+      },
+    );
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: parsedData.find((el) => el.id === tourId),
+      },
+    });
+  });
+};
+
 app.route('/api/v1/tours').get(getTours).post(createTour);
 app.route('/api/v1/tours/:id').get(getTour).delete(deleteTour).patch(patchTour);
-
-//app.route('/api/v1/tours/:id/todos').post(createTodo);
-//app.route('/api/v1/tours/:id/todos/:todoId').patch(patchTodo).delete(deleteTodo);
+app.route('/api/v1/tours/:id/todo').post(createTodo);
+app.route('/api/v1/tours/:id/todo/:todoId').delete(deleteTodo).put(putTodo);
 
 ////// start - 串接 line message api 之後改成從 line SDK 輸出結果 //////
 const getNtdByYen = async (req, res) => {
