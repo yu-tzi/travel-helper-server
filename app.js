@@ -30,30 +30,18 @@ if (process.env.NODE_ENV === 'development') {
 ////// start - 串接 line message api 之後改成從 line SDK 輸出結果 //////
 const getNtdByYen = async (req, res) => {
   const { yen } = req.body;
-  try {
-    const ntd = await calculateNtdByYen(yen);
-    res.status(200).json({
-      result: ntd,
-    });
-  } catch (e) {
-    res.status(404).json({
-      result: 'error',
-    });
-  }
+  const ntd = await calculateNtdByYen(yen);
+  res.status(200).json({
+    result: ntd,
+  });
 };
 
 const getYenByNtd = async (req, res) => {
   const { ntd } = req.body;
-  try {
-    const yen = await calculateYenByNtd(ntd);
-    res.status(200).json({
-      result: yen,
-    });
-  } catch (e) {
-    res.status(404).json({
-      result: 'error',
-    });
-  }
+  const yen = await calculateYenByNtd(ntd);
+  res.status(200).json({
+    result: yen,
+  });
 };
 
 app.route('/api/v1/ntd').get(getNtdByYen);

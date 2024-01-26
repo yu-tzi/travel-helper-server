@@ -2,6 +2,34 @@ const fs = require('fs');
 const short = require('short-uuid');
 const translator = short();
 
+exports.checkPermission = async (req, res, next) => {
+  // 1) 從 client 取得 id token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    const lineIdToken = req.headers.authorization.split(' ')[1];
+    // 2) 把 token 傳給 line 驗證並得到使用者資料
+    const { sub: userID } = await fetch(
+      'https://api.line.me/oauth2/v2.1/verify',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id_token=${lineIdToken}&client_id=${process.env.LINE_CHANNEL_ID}`,
+      },
+    );
+    req.userID = userID;
+    if (!userID) {
+      next(
+        res
+          .status(401)
+          .json({ status: 'fail', message: 'check permission fail' }),
+      );
+    }
+  }
+  next();
+};
+
 exports.getTours = (req, res) => {
   fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
     if (err) {

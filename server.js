@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const app = require('./app');
 
+/*
 mongoose
   .connect(process.env.DATABASE, {
     useNewUrlParser: true,
@@ -12,6 +13,7 @@ mongoose
   .then((_) => {
     console.log('DB connection successful!');
   });
+*/
 
 const PORT = process.env.PORT || 3000;
 
