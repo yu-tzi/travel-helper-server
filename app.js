@@ -29,7 +29,7 @@ app.post('/webhook', (req, res) => {
 
 const client = new line.messagingApi.MessagingApiClient(config);
 
-function handleEvent(event) {
+const handleEvent = async (event) => {
   if (
     event.type !== 'message' ||
     event.message.type !== 'text' ||
@@ -37,37 +37,45 @@ function handleEvent(event) {
   ) {
     return Promise.resolve(null);
   }
+  if (
+    event.message.text.includes('日幣') ||
+    event.message.text.includes('台幣')
+  ) {
+    const regex = /\d+/;
+    const match = event.message.text.match(regex);
+    const amount = parseInt(match[0], 10);
+    const currency = event.message.text.includes('日幣') ? '日幣' : '台幣';
+    const returnCurrency = event.message.text.includes('日幣')
+      ? '台幣'
+      : '日幣';
+    let returnAmount = 0;
+    if (currency === '日幣') {
+      const ntd = await calculateNtdByYen(amount);
+      returnAmount = ntd;
+    } else if (currency === '台幣') {
+      const yen = await calculateYenByNtd(amount);
+      returnAmount = yen;
+    }
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [
+        {
+          type: 'text',
+          text: `${currency} ${amount} 等於 ${returnCurrency} ${returnAmount}`,
+        },
+      ],
+    });
+  }
   return client.replyMessage({
     replyToken: event.replyToken,
     messages: [
       {
         type: 'text',
-        text: event.message.text,
+        text: '如果要查詢匯率，請輸入「日幣」或「台幣」以及金額，例如：「日幣1000」',
       },
     ],
   });
-}
-
-////// start - 串接 line message api 之後改成從 line SDK 輸出結果 //////
-const getNtdByYen = async (req, res) => {
-  const { yen } = req.body;
-  const ntd = await calculateNtdByYen(yen);
-  res.status(200).json({
-    result: ntd,
-  });
 };
-
-const getYenByNtd = async (req, res) => {
-  const { ntd } = req.body;
-  const yen = await calculateYenByNtd(ntd);
-  res.status(200).json({
-    result: yen,
-  });
-};
-
-app.route('/api/v1/ntd').get(getNtdByYen);
-app.route('/api/v1/yen').get(getYenByNtd);
-////// end - 串接 line message api 之後改成從 line SDK 輸出結果 //////
 
 /*
 app.use(
