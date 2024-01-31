@@ -30,5 +30,33 @@
         "checked": false
       }
     ]
+  },
+  {
+    "id": "i9AaocW8Tw9r7fn3yyn4vE",
+    "timestamp": 1706349274167,
+    "name": "大丸百貨",
+    "location": "https://maps.app.goo.gl/FQ2M2Gep2Eh4x1Ur5",
+    "todo": []
+  },
+  {
+    "id": "3qNQf9NEt6YpZGecxCTdPV",
+    "timestamp": 1706349374167,
+    "name": "札幌機場",
+    "location": "https://maps.app.goo.gl/FQ2M2Gep2Eh4x1Ur5",
+    "todo": []
+  },
+  {
+    "id": "6uFNxs8iT2FrZnoTmZDpgS",
+    "timestamp": 1706349384167,
+    "name": "神社",
+    "location": "https://maps.app.goo.gl/FQ2M2Gep2Eh4x1Ur5",
+    "todo": []
+  },
+  {
+    "id": "oz5JXuZLD32nvxc1U1Nfei",
+    "timestamp": 1706349584167,
+    "name": "成吉思汗燒肉",
+    "location": "https://maps.app.goo.gl/FQ2M2Gep2Eh4x1Ur5",
+    "todo": []
   }
 ]

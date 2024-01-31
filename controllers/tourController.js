@@ -19,6 +19,7 @@ exports.checkPermission = async (req, res, next) => {
       },
     );
     req.userID = userID;
+    /*
     if (!userID) {
       next(
         res
@@ -26,6 +27,7 @@ exports.checkPermission = async (req, res, next) => {
           .json({ status: 'fail', message: 'check permission fail' }),
       );
     }
+    */
   }
   next();
 };

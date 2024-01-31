@@ -9,19 +9,21 @@ const {
 
 const app = express();
 app.use(express.json());
+
+/*
 app.use(
   '/api/v1/tours',
   cors({
     origin: process.env.CLIENT_URL,
   }),
 );
-// handle preflight request
 app.options(
   '/api/v1/tours',
   cors({
     origin: process.env.CLIENT_URL,
   }),
 );
+*/
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
