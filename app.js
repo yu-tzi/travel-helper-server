@@ -77,20 +77,8 @@ const handleEvent = async (event) => {
   });
 };
 
-/*
-app.use(
-  '/api/v1/tours',
-  cors({
-    origin: process.env.CLIENT_URL,
-  }),
-);
-app.options(
-  '/api/v1/tours',
-  cors({
-    origin: process.env.CLIENT_URL,
-  }),
-);
-*/
+app.use('/api/v1/tours', cors());
+app.options('/api/v1/tours', cors());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
