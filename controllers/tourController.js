@@ -10,24 +10,21 @@ exports.checkPermission = async (req, res, next) => {
   ) {
     const lineIdToken = req.headers.authorization.split(' ')[1];
     // 2) 把 token 傳給 line 驗證並得到使用者資料
-    const { sub: userID } = await fetch(
-      'https://api.line.me/oauth2/v2.1/verify',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id_token=${lineIdToken}&client_id=${process.env.LINE_CHANNEL_ID}`,
-      },
-    );
-    req.userID = userID;
-    /*
-    if (!userID) {
+    const res = await fetch('https://api.line.me/oauth2/v2.1/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `id_token=${lineIdToken}&client_id=${process.env.LINE_CHANNEL_ID}`,
+    });
+    const data = await res.json();
+    req.userID = data?.sub;
+    // something like this "Udf847f1111801c615bb57897fac44d0d"
+    if (!req?.userID) {
       next(
         res
           .status(401)
           .json({ status: 'fail', message: 'check permission fail' }),
       );
     }
-    */
   }
   next();
 };
