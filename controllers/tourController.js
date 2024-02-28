@@ -32,8 +32,7 @@ exports.checkPermission = async (req, res, next) => {
 };
 
 exports.createTour = async (req, res) => {
-  const id = translator.generate();
-  const data = Object.assign({ tour_id: id }, req.body);
+  const data = Object.assign({ userID: req.userID }, req.body);
   try {
     const newTour = await Tour.create(data);
     res.status(201).json({
@@ -50,36 +49,40 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.getTours = (req, res) => {
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
+exports.getTours = async (req, res) => {
+  try {
+    const tours = await Tour.find({ userID: req.userID });
     res.status(200).json({
       status: 'success',
-      results: JSON.parse(data).length,
+      results: tours.length,
       data: {
-        tours: JSON.parse(data),
+        tours,
       },
     });
-  });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
-exports.getTour = (req, res) => {
+exports.getTour = async (req, res) => {
   const { id } = req.params;
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const parsedData = JSON.parse(data);
-    const tour = parsedData.find((el) => el.id === id);
+  try {
+    const tours = await Tour.findOne({ userID: req.userID, _id: id });
     res.status(200).json({
       status: 'success',
       data: {
-        tour,
+        tours,
       },
     });
-  });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
 exports.deleteTour = (req, res) => {

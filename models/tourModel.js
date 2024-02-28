@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 const todoSchema = new mongoose.Schema({
-  todo_id: { type: String, required: [true, 'missing id'] },
   name: { type: String, required: [true, 'missing name'] },
   checked: { type: Boolean, required: true },
 });
 
 const tourSchema = new mongoose.Schema({
-  tour_id: { type: String, required: [true, 'missing id'] },
+  userID: { type: String, required: [true, 'missing userID'] },
   date: { type: Date, required: [true, 'missing date'] },
   duration: { type: Number, required: [true, 'missing time'] },
   priority: {
