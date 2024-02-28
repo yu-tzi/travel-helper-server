@@ -4,7 +4,7 @@ const {
   createTour,
   getTour,
   deleteTour,
-  patchTour,
+  updateTour,
   createTodo,
   deleteTodo,
   putTodo,
@@ -20,7 +20,7 @@ router
   .route('/:id')
   .get(checkPermission, getTour)
   .delete(checkPermission, deleteTour)
-  .patch(checkPermission, patchTour);
+  .patch(checkPermission, updateTour);
 router.route('/:id/todo').post(checkPermission, createTodo);
 router
   .route('/:id/todo/:todoId')

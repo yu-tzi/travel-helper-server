@@ -35,10 +35,13 @@ exports.createTour = async (req, res) => {
   const data = Object.assign({ userID: req.userID }, req.body);
   try {
     const newTour = await Tour.create(data);
+    const tourData = newTour.toObject();
+    delete tourData.userID;
+    delete tourData.__v;
     res.status(201).json({
       status: 'success',
       data: {
-        tour: newTour,
+        tour: tourData,
       },
     });
   } catch (err) {
@@ -51,7 +54,7 @@ exports.createTour = async (req, res) => {
 
 exports.getTours = async (req, res) => {
   try {
-    const tours = await Tour.find({ userID: req.userID });
+    const tours = await Tour.find({ userID: req.userID }, '-userID -__v');
     res.status(200).json({
       status: 'success',
       results: tours.length,
@@ -70,7 +73,10 @@ exports.getTours = async (req, res) => {
 exports.getTour = async (req, res) => {
   const { id } = req.params;
   try {
-    const tours = await Tour.findOne({ userID: req.userID, _id: id });
+    const tours = await Tour.findOne(
+      { userID: req.userID, _id: id },
+      '-userID -__v',
+    );
     res.status(200).json({
       status: 'success',
       data: {
@@ -79,6 +85,29 @@ exports.getTour = async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
+};
+
+exports.updateTour = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // query, update, options
+    const newTour = await Tour.findOneAndUpdate(
+      { userID: req.userID, _id: id },
+      req.body,
+      { new: true, select: '-userID -__v' },
+    );
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tours: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
       status: 'fail',
       message: err.message,
     });
@@ -104,43 +133,6 @@ exports.deleteTour = (req, res) => {
           status: 'success',
           data: {
             tour: newTour,
-          },
-        });
-      },
-    );
-  });
-};
-
-exports.patchTour = (req, res) => {
-  const { id } = req.params;
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const parsedData = JSON.parse(data);
-    const adjustedTour = parsedData.map((el) => {
-      if (el.id === id) {
-        // req.body should look like this
-        /*
-          {
-            "name": "六花亭買伴手禮",
-          }
-          */
-        return Object.assign(el, req.body);
-      }
-      return el;
-    });
-    fs.writeFile(
-      `${__dirname}/../data/tours.json`,
-      JSON.stringify(adjustedTour),
-      (err) => {
-        if (err) {
-          console.error(`💥 Error: ${err}`);
-        }
-        res.status(201).json({
-          status: 'success',
-          data: {
-            tour: adjustedTour.find((el) => el.id === id),
           },
         });
       },
