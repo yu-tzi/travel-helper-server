@@ -54,7 +54,35 @@ exports.createTour = async (req, res) => {
 
 exports.getTours = async (req, res) => {
   try {
-    const tours = await Tour.find({ userID: req.userID }, '-userID -__v');
+    // filtering
+    const queryObject = Object.keys(req.query).reduce((acc, cur) => {
+      const excludeFields = ['page', 'sort', 'limit', 'fields'];
+      const operatorSign = ['gte', 'gt', 'lte', 'lt'];
+      if (!excludeFields.includes(cur)) {
+        const queryStr = JSON.stringify(req.query[cur]);
+        const pattern = new RegExp(operatorSign.join('|'));
+        if (typeof req.query[cur] === 'object' && pattern.test(queryStr)) {
+          // match the exact operationSign (\b) and do replacement multiple times (g)
+          const newQuery = queryStr.replace(
+            new RegExp(`\\b(${operatorSign.join('|')})\\b`, 'g'),
+            (match) => {
+              return `$${match}`;
+            },
+          );
+          acc[cur] = JSON.parse(newQuery);
+        } else {
+          acc[cur] = req.query[cur];
+        }
+      }
+      return acc;
+    }, {});
+    // build query
+    const toursQuery = Tour.find(
+      { userID: req.userID, ...queryObject },
+      '-userID -__v',
+    );
+    // execute query
+    const tours = await toursQuery;
     res.status(200).json({
       status: 'success',
       results: tours.length,
