@@ -77,10 +77,14 @@ exports.getTours = async (req, res) => {
       return acc;
     }, {});
     // build query
-    const toursQuery = Tour.find(
+    let toursQuery = Tour.find(
       { userID: req.userID, ...queryObject },
       '-userID -__v',
     );
+    // sorting
+    if (req.query.sort) {
+      toursQuery = toursQuery.sort(req.query.sort);
+    }
     // execute query
     const tours = await toursQuery;
     res.status(200).json({
