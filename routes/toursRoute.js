@@ -7,7 +7,7 @@ const {
   updateTour,
   createTodo,
   deleteTodo,
-  putTodo,
+  updateTodo,
   checkPermission,
 } = require('../controllers/tourController');
 const router = express.Router();
@@ -25,6 +25,6 @@ router.route('/:id/todo').post(checkPermission, createTodo);
 router
   .route('/:id/todo/:todoId')
   .delete(checkPermission, deleteTodo)
-  .put(checkPermission, putTodo);
+  .put(checkPermission, updateTodo);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const todoSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'missing name'] },
-  checked: { type: Boolean, required: true },
+  checked: { type: Boolean, default: false },
 });
 
 const tourSchema = new mongoose.Schema({

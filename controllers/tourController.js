@@ -142,106 +142,75 @@ exports.deleteTour = async (req, res) => {
   }
 };
 
-exports.createTodo = (req, res) => {
-  const tourId = req.params.id;
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const parsedData = JSON.parse(data);
-    // req.body should look like this
-    /*
+exports.createTodo = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const newTour = await Tour.findOneAndUpdate(
+      { userID: req.userID, _id: id },
+      { $push: { todo: req.body } },
       {
-        name: '買夾心餅乾',
-        checked: false,
-      }
-      */
-    const newTodo = Object.assign({ id: translator.generate() }, req.body);
-    parsedData.find((el) => el.id === tourId).todo.push(newTodo);
-    fs.writeFile(
-      `${__dirname}/../data/tours.json`,
-      JSON.stringify(parsedData),
-      (err) => {
-        if (err) {
-          console.error(`💥 Error: ${err}`);
-        }
+        new: true,
+        select: '-userID -__v',
+        runValidators: true,
+        context: 'query',
       },
     );
     res.status(201).json({
       status: 'success',
-      data: {
-        tour: parsedData.find((el) => el.id === tourId),
-      },
+      data: newTour,
     });
-  });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
-exports.deleteTodo = (req, res) => {
-  const tourId = req.params.id;
+exports.deleteTodo = async (req, res) => {
+  const id = req.params.id;
   const todoId = req.params.todoId;
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const parsedData = JSON.parse(data);
-    const targetTodo = parsedData.find((el) => el.id === tourId).todo;
-    const newData = targetTodo.filter((todo) => todo.id !== todoId);
-    parsedData.find((el) => el.id === tourId).todo = newData;
-    fs.writeFile(
-      `${__dirname}/../data/tours.json`,
-      JSON.stringify(parsedData),
-      (err) => {
-        if (err) {
-          console.error(`💥 Error: ${err}`);
-        }
+  try {
+    const newTour = await Tour.findOneAndUpdate(
+      { userID: req.userID, _id: id },
+      { $pull: { todo: { _id: todoId } } },
+      {
+        new: true,
+        select: '-userID -__v',
       },
     );
     res.status(201).json({
       status: 'success',
-      data: {
-        tour: parsedData.find((el) => el.id === tourId),
-      },
+      data: newTour,
     });
-  });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
-exports.putTodo = (req, res) => {
-  const tourId = req.params.id;
+exports.updateTodo = async (req, res) => {
+  const id = req.params.id;
   const todoId = req.params.todoId;
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const parsedData = JSON.parse(data);
-    const targetTodo = parsedData.find((el) => el.id === tourId).todo;
-    const newData = targetTodo.map((todo) => {
-      if (todo.id === todoId) {
-        // req.body should look like this
-        /*
-          {
-            name: '買萊姆酒葡萄夾心餅乾',
-            checked: true,
-          }
-          */
-        return Object.assign({ id: todo.id }, req.body);
-      }
-      return todo;
-    });
-    parsedData.find((el) => el.id === tourId).todo = newData;
-    fs.writeFile(
-      `${__dirname}/../data/tours.json`,
-      JSON.stringify(parsedData),
-      (err) => {
-        if (err) {
-          console.error(`💥 Error: ${err}`);
-        }
+  try {
+    const newTour = await Tour.findOneAndUpdate(
+      { userID: req.userID, _id: id, 'todo._id': todoId },
+      { $set: { 'todo.$': req.body } },
+      {
+        new: true,
+        select: '-userID -__v',
       },
     );
     res.status(201).json({
       status: 'success',
-      data: {
-        tour: parsedData.find((el) => el.id === tourId),
-      },
+      data: newTour,
     });
-  });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
