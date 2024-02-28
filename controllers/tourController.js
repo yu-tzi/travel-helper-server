@@ -18,31 +18,17 @@ exports.checkPermission = async (req, res, next) => {
     });
     const data = await res.json();
     req.userID = data?.sub;
-    // something like this "Udf847f1111801c615bb57897fac44d0d"
-    if (!req?.userID) {
-      next(
-        res
-          .status(401)
-          .json({ status: 'fail', message: 'check permission fail' }),
-      );
-    }
+  }
+  // TODO: 移除 mock data
+  req.userID = 'Udf847f1111801c615bb57897fac44d0d';
+  if (!req?.userID) {
+    next(
+      res
+        .status(401)
+        .json({ status: 'fail', message: 'check permission fail' }),
+    );
   }
   next();
-};
-
-exports.getTours = (req, res) => {
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    res.status(200).json({
-      status: 'success',
-      results: JSON.parse(data).length,
-      data: {
-        tours: JSON.parse(data),
-      },
-    });
-  });
 };
 
 exports.createTour = async (req, res) => {
@@ -62,6 +48,21 @@ exports.createTour = async (req, res) => {
       message: err.message,
     });
   }
+};
+
+exports.getTours = (req, res) => {
+  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
+    if (err) {
+      console.error(`💥 Error: ${err}`);
+    }
+    res.status(200).json({
+      status: 'success',
+      results: JSON.parse(data).length,
+      data: {
+        tours: JSON.parse(data),
+      },
+    });
+  });
 };
 
 exports.getTour = (req, res) => {
