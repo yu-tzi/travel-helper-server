@@ -94,11 +94,23 @@ exports.getTour = async (req, res) => {
 exports.updateTour = async (req, res) => {
   const { id } = req.params;
   try {
+    const validDataKeys = ['date', 'duration', 'priority', 'name'];
+    const newData = validDataKeys.reduce((acc, cur) => {
+      if (req.body.hasOwnProperty(cur)) {
+        acc[cur] = req.body[cur];
+      }
+      return acc;
+    }, {});
     // query, update, options
     const newTour = await Tour.findOneAndUpdate(
       { userID: req.userID, _id: id },
-      req.body,
-      { new: true, select: '-userID -__v' },
+      newData,
+      {
+        new: true,
+        select: '-userID -__v',
+        runValidators: true,
+        context: 'query',
+      },
     );
     res.status(201).json({
       status: 'success',
