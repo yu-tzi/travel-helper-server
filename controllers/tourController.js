@@ -1,6 +1,7 @@
 const fs = require('fs');
 const short = require('short-uuid');
 const translator = short();
+const Tour = require('../models/tourModel');
 
 exports.checkPermission = async (req, res, next) => {
   // 1) 從 client 取得 id token
@@ -44,40 +45,23 @@ exports.getTours = (req, res) => {
   });
 };
 
-exports.createTour = (req, res) => {
-  const newId = translator.generate();
-  const newTour = Object.assign({ id: newId }, req.body);
-  // req.body should look like this
-  /*
-    {
-      "timestamp": 1706066106947,
-      "name": "六花亭買伴手禮",
-      "location": "https://maps.app.goo.gl/n3Nsi8DYhr8iUXcW9",
-      "todo": []
-    }
-    */
-  fs.readFile(`${__dirname}/../data/tours.json`, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(`💥 Error: ${err}`);
-    }
-    const newData = JSON.parse(data);
-    newData.push(newTour);
-    fs.writeFile(
-      `${__dirname}/../data/tours.json`,
-      JSON.stringify(newData),
-      (err) => {
-        if (err) {
-          console.error(`💥 Error: ${err}`);
-        }
-        res.status(201).json({
-          status: 'success',
-          data: {
-            tour: newTour,
-          },
-        });
+exports.createTour = async (req, res) => {
+  const id = translator.generate();
+  const data = Object.assign({ tour_id: id }, req.body);
+  try {
+    const newTour = await Tour.create(data);
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour,
       },
-    );
-  });
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
 exports.getTour = (req, res) => {
