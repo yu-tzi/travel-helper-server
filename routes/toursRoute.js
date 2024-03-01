@@ -9,9 +9,11 @@ const {
   deleteTodo,
   updateTodo,
   checkPermission,
+  getStatistics,
 } = require('../controllers/tourController');
 const router = express.Router();
 
+router.route('/stats').get(checkPermission, getStatistics);
 router
   .route('/')
   .get(checkPermission, getTours)
@@ -26,5 +28,4 @@ router
   .route('/:id/todo/:todoId')
   .delete(checkPermission, deleteTodo)
   .put(checkPermission, updateTodo);
-
 module.exports = router;

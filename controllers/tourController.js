@@ -222,3 +222,37 @@ exports.updateTodo = async (req, res) => {
     });
   }
 };
+
+exports.getStatistics = async (req, res) => {
+  try {
+    const statistics = await Tour.aggregate([
+      {
+        $match: {
+          userID: req.userID,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgDuration: { $avg: '$duration' },
+          maxDuration: { $max: '$duration' },
+          minDuration: { $min: '$duration' },
+          todoCount: { $sum: { $size: '$todo' } },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        count: statistics.length,
+        stats: statistics,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
+};
