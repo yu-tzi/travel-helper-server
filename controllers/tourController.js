@@ -85,6 +85,12 @@ exports.getTours = async (req, res) => {
     if (req.query.sort) {
       toursQuery = toursQuery.sort(req.query.sort);
     }
+    // paging
+    const { page, limit } = req.query;
+    if (!isNaN(page) && !isNaN(limit)) {
+      const skipValue = (+page - 1) * +limit;
+      toursQuery = toursQuery.skip(skipValue).limit(+limit);
+    }
     // execute query
     const tours = await toursQuery;
     res.status(200).json({
