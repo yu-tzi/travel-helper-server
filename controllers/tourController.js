@@ -1,7 +1,5 @@
-const fs = require('fs');
-const short = require('short-uuid');
-const translator = short();
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 exports.checkPermission = async (req, res, next) => {
   // 1) 從 client 取得 id token
@@ -54,43 +52,15 @@ exports.createTour = async (req, res) => {
 
 exports.getTours = async (req, res) => {
   try {
-    // filtering
-    const queryObject = Object.keys(req.query).reduce((acc, cur) => {
-      const excludeFields = ['page', 'sort', 'limit', 'fields'];
-      const operatorSign = ['gte', 'gt', 'lte', 'lt'];
-      if (!excludeFields.includes(cur)) {
-        const queryStr = JSON.stringify(req.query[cur]);
-        const pattern = new RegExp(operatorSign.join('|'));
-        if (typeof req.query[cur] === 'object' && pattern.test(queryStr)) {
-          // match the exact operationSign (\b) and do replacement multiple times (g)
-          const newQuery = queryStr.replace(
-            new RegExp(`\\b(${operatorSign.join('|')})\\b`, 'g'),
-            (match) => {
-              return `$${match}`;
-            },
-          );
-          acc[cur] = JSON.parse(newQuery);
-        } else {
-          acc[cur] = req.query[cur];
-        }
-      }
-      return acc;
-    }, {});
-    // build query
-    let toursQuery = Tour.find(
-      { userID: req.userID, ...queryObject },
-      '-userID -__v',
-    );
-    // sorting
-    if (req.query.sort) {
-      toursQuery = toursQuery.sort(req.query.sort);
-    }
-    // paging
-    const { page, limit } = req.query;
-    if (!isNaN(page) && !isNaN(limit)) {
-      const skipValue = (+page - 1) * +limit;
-      toursQuery = toursQuery.skip(skipValue).limit(+limit);
-    }
+    const arrangedDocument = new APIFeatures(
+      Tour.find({}, '-userID -__v'),
+      req.query,
+      req.userID,
+    )
+      .filter()
+      .sort()
+      .paging();
+    const toursQuery = arrangedDocument.query;
     // execute query
     const tours = await toursQuery;
     res.status(200).json({
