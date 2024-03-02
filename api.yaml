@@ -1,0 +1,338 @@
+openapi: '3.0.0'
+info:
+  title: Travel Helper API
+  description: API for managing tours and associated tasks.
+  version: '1.0.0'
+servers:
+  - url: https://travel-helper-server.onrender.com
+    description: Production server (take times to wake up cause I didn't pay extra money)
+paths:
+  /tours:
+    get:
+      summary: Get all tours
+      operationId: getTours
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: duration
+          in: query
+          schema:
+            type: integer
+          description: Filter tours by exact duration in minutes.
+        - name: duration[gte]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with duration greater than or equal to the specified value.
+        - name: duration[gt]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with duration greater than the specified value.
+        - name: duration[lte]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with duration less than or equal to the specified value.
+        - name: duration[lt]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with duration less than the specified value.
+        - name: priority
+          in: query
+          schema:
+            type: integer
+          description: Filter tours by exact priority.
+        - name: priority[gte]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with priority greater than or equal to the specified value.
+        - name: priority[gt]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with priority greater than the specified value.
+        - name: priority[lte]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with priority less than or equal to the specified value.
+        - name: priority[lt]
+          in: query
+          schema:
+            type: integer
+          description: Filter tours with priority less than the specified value.
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: Sort tours by a specific field. Prefix with '-' for descending order. e.g. sort=-priority
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Specify the page number for pagination.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: Specify the number of tours to return per page for pagination.
+      responses:
+        '200':
+          description: A list of tours
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tour'
+    post:
+      summary: Create a new tour
+      operationId: createTour
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                duration:
+                  type: number
+                priority:
+                  type: number
+                name:
+                  type: string
+                location:
+                  type: string
+              required:
+                - date
+                - duration
+                - priority
+                - name
+      responses:
+        '201':
+          description: Tour created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tour'
+  /tours/{id}:
+    get:
+      summary: Get a tour by ID
+      operationId: getTour
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single tour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tour'
+    patch:
+      summary: Update a tour
+      operationId: updateTour
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                duration:
+                  type: number
+                priority:
+                  type: number
+                name:
+                  type: string
+                location:
+                  type: string
+              required:
+                - date
+                - duration
+                - priority
+                - name
+      responses:
+        '200':
+          description: Tour updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tour'
+    delete:
+      summary: Delete a tour
+      operationId: deleteTour
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Tour deleted successfully
+  /tours/{id}/todo:
+    post:
+      summary: Create a new todo for a tour
+      operationId: createTodo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+  /tours/{id}/todo/{todoId}:
+    delete:
+      summary: Delete a todo from a tour
+      operationId: deleteTodo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Todo deleted successfully
+    put:
+      summary: Update a todo for a tour
+      operationId: updateTodo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+  /tours/stats:
+    get:
+      summary: Get statistics about tours
+      operationId: getStatistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+components:
+  schemas:
+    Tour:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        duration:
+          type: number
+        priority:
+          type: number
+        name:
+          type: string
+        location:
+          type: string
+        todo:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+      required:
+        - date
+        - duration
+        - priority
+        - name
+    Todo:
+      type: object
+      properties:
+        name:
+          type: string
+        checked:
+          type: boolean
+      required:
+        - name
+        - checked
+    Statistics:
+      type: object
+      properties:
+        avgDuration:
+          type: number
+        maxDuration:
+          type: number
+        minDuration:
+          type: number
+        todoCount:
+          type: number
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
