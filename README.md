@@ -56,7 +56,7 @@ fetch('https://travel-helper-server.onrender.com/api/v1/tours?sort=date',
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer your_access_token_here'
+      'Authorization': 'Bearer users_line_login_token_here'
     }
   })
 ```
