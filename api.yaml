@@ -7,7 +7,7 @@ servers:
   - url: https://travel-helper-server.onrender.com
     description: Production server (take times to wake up cause I didn't pay extra money)
 paths:
-  /tours:
+  /api/v1/tours:
     get:
       summary: Get all tours
       operationId: getTours
@@ -124,7 +124,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tour'
-  /tours/{id}:
+  /api/v1/tours/{id}:
     get:
       summary: Get a tour by ID
       operationId: getTour
@@ -198,7 +198,7 @@ paths:
       responses:
         '204':
           description: Tour deleted successfully
-  /tours/{id}/todo:
+  /api/v1/tours/{id}/todo:
     post:
       summary: Create a new todo for a tour
       operationId: createTodo
@@ -223,7 +223,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Todo'
-  /tours/{id}/todo/{todoId}:
+  /api/v1/tours/{id}/todo/{todoId}:
     delete:
       summary: Delete a todo from a tour
       operationId: deleteTodo
@@ -272,7 +272,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Todo'
-  /tours/stats:
+  /api/v1/tours/stats:
     get:
       summary: Get statistics about tours
       operationId: getStatistics
